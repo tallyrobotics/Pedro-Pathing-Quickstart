@@ -58,7 +58,7 @@ public class LocalizationTest extends OpMode {
         rightRear = hardwareMap.get(DcMotorEx.class, rightRearMotorName);
         rightFront = hardwareMap.get(DcMotorEx.class, rightFrontMotorName);
 
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motors = Arrays.asList(leftFront, leftRear, rightFront, rightRear);
@@ -91,10 +91,16 @@ public class LocalizationTest extends OpMode {
         poseUpdater.update();
         dashboardPoseTracker.update();
 
-        double y = -gamepad1.left_stick_y; // Remember, this is reversed!
-        double x = gamepad1.left_stick_x; // this is strafing
-        double rx = gamepad1.right_stick_x;
+        double scaler = 0.6;
 
+        if (gamepad1.right_bumper) {
+            scaler = 0.8;
+        } else if (gamepad1.left_bumper) {
+            scaler = 0.4;
+        }
+        double y = -gamepad1.left_stick_y * scaler; // Remember, this is reversed!
+        double x = gamepad1.left_stick_x * scaler; // this is strafing
+        double rx = gamepad1.right_stick_x * scaler;
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio, but only when
         // at least one is out of the range [-1, 1]
