@@ -59,7 +59,7 @@ public class LocalizationTest extends OpMode {
         rightFront = hardwareMap.get(DcMotorEx.class, rightFrontMotorName);
 
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motors = Arrays.asList(leftFront, leftRear, rightFront, rightRear);
 
