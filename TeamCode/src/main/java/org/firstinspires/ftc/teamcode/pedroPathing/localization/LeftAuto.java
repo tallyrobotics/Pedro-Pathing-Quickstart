@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@Disabled
 @Autonomous
 public class LeftAuto extends LinearOpMode {
     private IMU imu;
