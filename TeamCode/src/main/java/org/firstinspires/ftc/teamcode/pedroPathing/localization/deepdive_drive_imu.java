@@ -1,3 +1,6 @@
+// 6.65625 is center
+// 3.25
+
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -23,6 +26,7 @@ public class deepdive_drive_imu extends LinearOpMode {
   private DcMotor backRight;
   private SparkFunOTOS sensor_otos;
   private DcMotor arm;
+  private DcMotor armOther;
   private DcMotor wrist;
   private Servo claw;
   private IMU imu;
@@ -45,6 +49,14 @@ public class deepdive_drive_imu extends LinearOpMode {
   int fieldCentric;
   boolean toggleClaw;
   int clawPosition;
+
+  double armPower = 0;
+  boolean armPowerApplied = true;
+  int armTargetPosition = 0;
+
+  double wristPower = 0;
+  boolean wristPowerApplied = true;
+  int wristTargetPosition = 0;
 
 
 
@@ -74,13 +86,14 @@ public class deepdive_drive_imu extends LinearOpMode {
     backRight = hardwareMap.get(DcMotor.class, "backRight");
 //    sensor_otos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
     arm = hardwareMap.get(DcMotor.class, "arm");
+    armOther = hardwareMap.get(DcMotor.class, "armOther");
     wrist = hardwareMap.get(DcMotor.class, "wrist");
     claw = hardwareMap.get(Servo.class, "claw");
 
     imu = hardwareMap.get(IMU.class, "imu");
     intake = hardwareMap.get(CRServo.class, "intake");
 
-    claw.scaleRange(0.5, 1);
+    claw.scaleRange(0.51, 1);
 
 //
 //    configureOTOS();
@@ -101,14 +114,18 @@ public class deepdive_drive_imu extends LinearOpMode {
     // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
     // <--- Click blue icon to see important note re. testing motor directions.
     frontLeft.setDirection(DcMotor.Direction.REVERSE);
-    backLeft.setDirection(DcMotor.Direction.FORWARD);
     frontRight.setDirection(DcMotor.Direction.REVERSE);
     backRight.setDirection(DcMotor.Direction.REVERSE);
+    armOther.setDirection(DcMotor.Direction.REVERSE);
+
     backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    armOther.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     // Wait for the game to start (driver presses PLAY)
     telemetry.addData("Status", "Initialized");
     telemetry.update();
@@ -119,6 +136,10 @@ public class deepdive_drive_imu extends LinearOpMode {
     targetHeading = 0;
     fieldCentric = 0;
     toggleFieldCentric = true;
+
+    arm.setTargetPosition(0);
+    armOther.setTargetPosition(0);
+    wrist.setTargetPosition(0);
 
     imu.resetYaw();
 
@@ -255,15 +276,17 @@ public class deepdive_drive_imu extends LinearOpMode {
     double correction;
     double driveScale = 0.0;
     double armScale = 0.0;
+    double wristScale = 0.0;
     double axial;
     double lateral;
     double yaw = 0.0;
-    double armPower;
     double joystickMagnitude;
     double turnTimer = 0.0;
     double newAxial;
     double newLateral;
     double max;
+    int intakeValue = 0;
+    double intakePower = 0;
 
     heading = imu.getRobotYawPitchRollAngles().getYaw();
 
@@ -286,12 +309,13 @@ public class deepdive_drive_imu extends LinearOpMode {
     }
 
     if (gamepad2.left_bumper) {
-      armScale = 0.15;
-    } else if (gamepad2.right_bumper) {
       armScale = 0.75;
+      wristScale = 0.3;
     } else {
-      armScale = 0.30;
+      armScale = 1;
+      wristScale = 0.45;
     }
+
 
     // toggle logic for field centric
     if (gamepad1.left_stick_button) {
@@ -311,24 +335,29 @@ public class deepdive_drive_imu extends LinearOpMode {
       toggleClaw = true;
     }
 
-    if (gamepad2.x) {
+    if (gamepad2.y) {
       intake.setPower(1);
-    } else if (gamepad2.y) {
+    } else if (gamepad2.x) {
       intake.setPower(-1);
     } else {
       intake.setPower(0);
     }
 
-    axial = -gamepad1.left_stick_y * driveScale;
-    lateral = gamepad1.left_stick_x * driveScale;
-    yaw = gamepad1.right_stick_x * driveScale;
 
-    armPower = -gamepad2.left_stick_y * armScale;
 
+
+    axial = -gamepad1.left_stick_y;
+    lateral = gamepad1.left_stick_x;
+    yaw = gamepad1.right_stick_x;
     joystickMagnitude = Math.sqrt(Math.pow(gamepad1.left_stick_y, 2) + Math.pow(gamepad1.left_stick_x, 2));
 
     axial = joystickMagnitude * axial;
     lateral = joystickMagnitude * lateral;
+
+    axial *= driveScale;
+    lateral *= driveScale;
+    yaw *= driveScale;
+
     if (Math.abs(yaw) > 0.1) {
       turnTimer = 10;
     }
@@ -352,9 +381,9 @@ public class deepdive_drive_imu extends LinearOpMode {
       axial = newAxial;
       lateral = newLateral;
     }
-    if (turnTimer == 0) {
-      yaw = -(headingError * 0.015 - headingDiff * 0.01);
-    }
+//    if (turnTimer == 0) {
+//      yaw = -(headingError * 0.015 - headingDiff * 0.01);
+//    }
     // Combine the joystick requests for each axis-motion to determine each wheel's power.
     // Set up a variable for each drive wheel to save the power level for telemetry.
     leftFrontPower = (axial + lateral) + yaw;
@@ -376,10 +405,75 @@ public class deepdive_drive_imu extends LinearOpMode {
     backLeft.setPower(leftBackPower);
     backRight.setPower(rightBackPower);
 
-    arm.setPower(armPower);
-    wrist.setPower(gamepad2.right_stick_y*0.5);
+//    arm.setPower(armPower);
+//    armOther.setPower(armPower);
+//    wrist.setPower(gamepad2.right_stick_y*0.5);
+//    if (arm.getCurrentPosition()>= 0) //set that 0 value to the actual limit value.
+//    {
+//      arm.setPower(-armPower);
+//      armOther.setPower(-armPower);
+//    }
 
     claw.setPosition(clawPosition);
+
+    wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    armOther.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    // Put loop blocks here.
+
+    // getting the input to check whether or not the joystick is actively being used.
+    wristPower = Math.pow(gamepad2.right_stick_y, 3);
+    armPower = -Math.pow(gamepad2.left_stick_y, 3);
+
+    if (armPower > 0 && arm.getCurrentPosition() > 10000) {
+      armPower = 0;
+    }
+
+    if (wristPower == 0) {
+      wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      wristPower = 0.6;
+
+      if (gamepad2.dpad_up) {
+        wristTargetPosition = 7;
+      } else if (gamepad2.dpad_down) {
+        wristTargetPosition = 7;
+      } else if (wristPowerApplied) {
+        wristPowerApplied = false;
+        wristTargetPosition = wrist.getCurrentPosition();
+      }
+      wrist.setTargetPosition(wristTargetPosition);
+    } else {
+      wristPowerApplied = true;
+      wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      wrist.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    if (armPower == 0) {
+      arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      armOther.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      armPower = 0.5;
+
+      if (gamepad2.dpad_up) {
+        armTargetPosition = 5200;
+      } else if (gamepad2.dpad_down) {
+        armTargetPosition = 1520;
+      } else if (armPowerApplied) {
+        armPowerApplied = false;
+        armTargetPosition = arm.getCurrentPosition();
+      }
+      arm.setTargetPosition(armTargetPosition);
+      armOther.setTargetPosition(armTargetPosition);
+    } else {
+      armPowerApplied = true;
+      arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      armOther.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+      arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      armOther.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    wrist.setPower(wristPower * wristScale);
+    arm.setPower(armPower * armScale);
+    armOther.setPower(armPower * armScale);
 
     // Show the elapsed game time and wheel power.
     telemetry.addData("Status", "Run Time: " + runtime);

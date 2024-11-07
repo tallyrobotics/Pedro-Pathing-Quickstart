@@ -37,7 +37,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Vector;
  * @author Anyi Lin - 10158 Scott's Bots
  * @version 1.0, 7/20/2024
  */
-public class OTOSLocalizer extends Localizer {
+public class OTOSLocalizerMini extends Localizer {
     private HardwareMap hardwareMap;
     private Pose startPose;
     private SparkFunOTOS otos;
@@ -53,7 +53,7 @@ public class OTOSLocalizer extends Localizer {
      *
      * @param map the HardwareMap
      */
-    public OTOSLocalizer(HardwareMap map) {
+    public OTOSLocalizerMini(HardwareMap map) {
         this(map, new Pose());
     }
 
@@ -64,7 +64,7 @@ public class OTOSLocalizer extends Localizer {
      * @param map the HardwareMap
      * @param setStartPose the Pose to start from
      */
-    public OTOSLocalizer(HardwareMap map, Pose setStartPose) {
+    public OTOSLocalizerMini(HardwareMap map, Pose setStartPose) {
         hardwareMap = map;
 
         /*
@@ -82,11 +82,11 @@ public class OTOSLocalizer extends Localizer {
         // For the OTOS, left/right is the y axis and forward/backward is the x axis, with left being
         // positive y and forward being positive x. PI/2 radians is facing forward, and clockwise
         // rotation is negative rotation.
-        otos.setOffset(new SparkFunOTOS.Pose2D(0.075,3.40625, 0));
+        otos.setOffset(new SparkFunOTOS.Pose2D(0,0, 0));
 
         // TODO: replace these with your tuned multipliers
-        otos.setLinearScalar(0.9637);
-        otos.setAngularScalar(0.9798/*1.0*/);
+        otos.setLinearScalar(1.11);
+        otos.setAngularScalar(0.9675/*1.0*/);
 
         otos.calibrateImu();
         otos.resetTracking();

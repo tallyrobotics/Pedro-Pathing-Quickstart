@@ -1,16 +1,10 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Path;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 
 /**
  * This is the CurvedBackAndForth autonomous OpMode. It runs the robot in a specified distance
@@ -26,14 +20,14 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
  * @version 1.0, 3/13/2024
  */
 @Config
-@Autonomous (name = "runPedroLeftAuto", group = "Autonomous Pathing")
-public class runPedroLeftAuto extends OpMode
+@Autonomous (name = "runPedroRightAuto", group = "Autonomous Pathing")
+public class runPedroRightAuto extends OpMode
 {
     private Follower follower;
 
-    private Pose startPose = new Pose(9, 84, 0);
+    private Pose startPose = new Pose(9, 60, 0);
 
-    private GeneratedPathPedroLeftAuto gppla;
+    private GeneratedPathPedroRightAuto gppra;
 
     private int pathNumber = -1;
 
@@ -49,10 +43,10 @@ public class runPedroLeftAuto extends OpMode
 
         follower.setStartingPose(startPose);
 
-        gppla = new GeneratedPathPedroLeftAuto();
+        gppra = new GeneratedPathPedroRightAuto();
 
         pathNumber = 0;
-        follower.followPath(gppla.specimenPlacement);
+        follower.followPath(gppra.specimenPlacement);
 
     }
 
@@ -72,49 +66,49 @@ public class runPedroLeftAuto extends OpMode
                     telemetry.addLine("specimen completed.");
                     telemetry.update();
 
-                    follower.followPath(gppla.firstSampleGrab);
+                    follower.followPath(gppra.firstSampleGrab);
                     break;
                 }
                 case 2: {
                     telemetry.addLine("first sample grab");
                     telemetry.update();
 
-                    follower.followPath(gppla.firstSampleRelease);
+                    follower.followPath(gppra.firstSampleRelease);
                     break;
                 }
                 case 3: {
                     telemetry.addLine("first sample release");
                     telemetry.update();
 
-                    follower.followPath(gppla.secondSampleGrab);
+                    follower.followPath(gppra.secondSampleGrab);
                     break;
                 }
                 case 4: {
                     telemetry.addLine("second sample grab");
                     telemetry.update();
 
-                    follower.followPath(gppla.secondSampleRelease);
+                    follower.followPath(gppra.secondSampleRelease);
                     break;
                 }
                 case 5: {
                     telemetry.addLine("second sample release");
                     telemetry.update();
 
-                    follower.followPath(gppla.thirdSampleGrab);
+                    follower.followPath(gppra.thirdSampleGrab);
                     break;
                 }
                 case 6: {
                     telemetry.addLine("third sample grab");
                     telemetry.update();
 
-                    follower.followPath(gppla.thirdSampleRelease);
+                    follower.followPath(gppra.thirdSampleRelease);
                     break;
                 }
                 case 7: {
                     telemetry.addLine("third sample release");
                     telemetry.update();
 
-                    follower.followPath(gppla.park);
+                    follower.followPath(gppra.park);
                     break;
                 }
 

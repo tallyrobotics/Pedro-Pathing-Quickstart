@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Disabled
 @Autonomous
 public class LeftAuto extends LinearOpMode {
     private IMU imu;
@@ -17,7 +17,9 @@ public class LeftAuto extends LinearOpMode {
     private DcMotor frontRight;
 
     private DcMotor arm;
+    private DcMotor armOther;
     private Servo claw;
+    private DcMotor wrist;
 
     @Override
     public void runOpMode() {
@@ -33,13 +35,27 @@ public class LeftAuto extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         arm = hardwareMap.get(DcMotor.class, "arm");
+        armOther = hardwareMap.get(DcMotor.class, "armOther");
         claw = hardwareMap.get(Servo.class, "claw");
+        wrist = hardwareMap.get(DcMotor.class, "wrist");
+
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armOther.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        arm.setTargetPosition(0);
+        armOther.setTargetPosition(0);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armOther.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(0.5);
+        armOther.setPower(0.5);
 
         claw.scaleRange(0.5, 1);
 
         backRight.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
+        armOther.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -57,44 +73,52 @@ public class LeftAuto extends LinearOpMode {
             telemetry.update();
 
             // raising arm
-            arm.setPower(0.5);
-            sleep(1900);
-
-            // holds arm in place, may need tweaking
-            arm.setPower(0.08);
-            sleep(1000);
-
+            arm.setTargetPosition(5200);
+            armOther.setTargetPosition(5200);
+            sleep(1500);
 
             // move forward to get into position to place specimen
-            move(0.2, 3.65);
+            move(0.2, 3.85);
             sleep(1000);
 
             // drop arm
-            arm.setPower(-0.5);
+            arm.setTargetPosition(4500);
+            armOther.setTargetPosition(4500);
             sleep(1000);
             arm.setPower(0);
-            sleep(500);
+            armOther.setPower(0);
             // open claw
             claw.setPosition(0);
             // raise arm out of the beam
             arm.setPower(0.5);
-            sleep(275);
-            arm.setPower(0.08);
+            armOther.setPower(0.5);
+            arm.setTargetPosition(5200);
+            armOther.setTargetPosition(5200);
             sleep(1000);
 
             // hopefully park?????
             move(-0.2, 1.5);
+            arm.setTargetPosition(6000);
+            armOther.setTargetPosition(6000);
             sleep(150);
-            strafe(-0.4, 1.75);
+            strafe(-0.4, 2);
             sleep(150);
             move(0.2, 4.15);
             sleep(150);
+            /*
+
+             */
             turnClockwiseToAngle(100);
             move(0.2, 1.3);
             sleep(150);
+
+            arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            armOther.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             arm.setPower(-0.05);
+            armOther.setPower(-0.05);
             sleep(2000);
             arm.setPower(0);
+            armOther.setPower(0);
 
             // just to make sure everything is completely off
             stopMotors();
