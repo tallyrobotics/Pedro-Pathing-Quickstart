@@ -39,7 +39,7 @@ public class runPedroRightAuto extends OpMode
     public void init()
     {
         follower = new Follower(hardwareMap);
-        follower.setMaxPower(0.6);
+        follower.setMaxPower(0.8);
 
         follower.setStartingPose(startPose);
 

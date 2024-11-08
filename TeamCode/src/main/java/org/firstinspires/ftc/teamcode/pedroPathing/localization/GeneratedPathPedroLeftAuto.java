@@ -103,9 +103,9 @@ public class GeneratedPathPedroLeftAuto {
                     // Line 8
                     new BezierCurve(
                             new Point(30.000, 114.000, Point.CARTESIAN),
-                            new Point(63.000, 140.000, Point.CARTESIAN),
-                            new Point(63.000, 130.000, Point.CARTESIAN),
-                            new Point(63.000, 100.000, Point.CARTESIAN)
+                            new Point(61.000, 140.000, Point.CARTESIAN),
+                            new Point(61.000, 130.000, Point.CARTESIAN),
+                            new Point(61.000, 100.000, Point.CARTESIAN)
                     )
             )
             .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(-90))
