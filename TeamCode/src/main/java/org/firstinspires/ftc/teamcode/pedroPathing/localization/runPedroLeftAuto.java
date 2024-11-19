@@ -5,12 +5,16 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
+import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierPoint;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Path;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
+
+import java.util.ArrayList;
 
 /**
  * This is the CurvedBackAndForth autonomous OpMode. It runs the robot in a specified distance
@@ -29,13 +33,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 @Autonomous (name = "runPedroLeftAuto", group = "Autonomous Pathing")
 public class runPedroLeftAuto extends OpMode
 {
+    private Servo claw;
+    
     private Follower follower;
-
     private Pose startPose = new Pose(9, 84, 0);
-
     private GeneratedPathPedroLeftAuto gppla;
-
     private int pathNumber = -1;
+    private int actionNumber = -1;
+    private boolean tryingToFollow = false;
+    private String[] telemetryMessages;
 
     /**
      * This initializes the Follower and creates the forward and backward Paths. Additionally, this
@@ -44,15 +50,26 @@ public class runPedroLeftAuto extends OpMode
     @Override
     public void init()
     {
+        claw = hardwareMap.get(Servo.class, "claw");
+        
         follower = new Follower(hardwareMap);
         follower.setMaxPower(0.8);
-
         follower.setStartingPose(startPose);
-
         gppla = new GeneratedPathPedroLeftAuto();
-
         pathNumber = 0;
+        actionNumber = 1;
         follower.followPath(gppla.specimenPlacement);
+
+        telemetryMessages = new String[] {
+                "specimen placement",
+                "cycle 1 grab",
+                "cycle 1 place",
+                "cycle 2 grab",
+                "cycle 2 place",
+                "cycle 3 grab",
+                "cycle 3 place",
+                "park"
+        };
 
     }
 
@@ -61,69 +78,110 @@ public class runPedroLeftAuto extends OpMode
      * the Telemetry, as well as the FTC Dashboard.
      */
     @Override
-    public void loop()
-    {
+    public void loop() {
+        telemetry.addLine(telemetryMessages[pathNumber]);
+        telemetry.update();
+
         follower.update();
-        if (!follower.isBusy()) {
+        if (!follower.isBusy() && !tryingToFollow) {
             pathNumber++;
+            actionNumber = 0;
+            tryingToFollow = true;
+        }
 
-            switch (pathNumber) {
-                case 1: {
-                    telemetry.addLine("specimen completed.");
-                    telemetry.update();
-
+        switch (pathNumber) {
+            case 0: {
+                break;
+            }
+            case 1: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.firstSampleGrab);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 2: {
-                    telemetry.addLine("first sample grab");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 2: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.firstSampleRelease);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 3: {
-                    telemetry.addLine("first sample release");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 3: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.secondSampleGrab);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 4: {
-                    telemetry.addLine("second sample grab");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 4: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.secondSampleRelease);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 5: {
-                    telemetry.addLine("second sample release");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 5: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.thirdSampleGrab);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 6: {
-                    telemetry.addLine("third sample grab");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 6: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.thirdSampleRelease);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
-                case 7: {
-                    telemetry.addLine("third sample release");
-                    telemetry.update();
 
+                actionNumber++;
+                break;
+            }
+            case 7: {
+                if (actionNumber == 0) {
+                    claw.setPosition(0);
+                } else if (actionNumber == 1){
                     follower.followPath(gppla.park);
-                    break;
+                } else {
+                    tryingToFollow = false;
                 }
 
-                default: {
-                    requestOpModeStop();
-                    break;
-                }
+                actionNumber++;
+                break;
             }
 
+            default: {
+                requestOpModeStop();
+                break;
+            }
         }
     }
 }
