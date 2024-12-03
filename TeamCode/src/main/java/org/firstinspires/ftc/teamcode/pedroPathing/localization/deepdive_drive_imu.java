@@ -33,6 +33,9 @@ public class deepdive_drive_imu extends LinearOpMode {
   private CRServo intake;
   private AnalogInput pot;
 
+
+  final double ratio = 2200;
+
   double leftFrontPower;
   double heading;
   ElapsedTime runtime;
@@ -445,18 +448,18 @@ public class deepdive_drive_imu extends LinearOpMode {
     }
 
     if (wristPower == 0) {
-      wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-      wristPower = 0.6;
-
-      if (gamepad2.dpad_up) {
-        wristTargetPosition = 7;
-      } else if (gamepad2.dpad_down) {
-        wristTargetPosition = 7;
-      } else if (wristPowerApplied) {
-        wristPowerApplied = false;
-        wristTargetPosition = wrist.getCurrentPosition();
-      }
-      wrist.setTargetPosition(wristTargetPosition);
+//      wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//      wristPower = 0.6;
+//
+//      if (gamepad2.dpad_up) {
+//        wristTargetPosition = 7;
+//      } else if (gamepad2.dpad_down) {
+//        wristTargetPosition = 7;
+//      } else if (wristPowerApplied) {
+//        wristPowerApplied = false;
+//        wristTargetPosition = wrist.getCurrentPosition();
+//      }
+//      wrist.setTargetPosition(wristTargetPosition);
     } else {
       wristPowerApplied = true;
       wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -464,16 +467,21 @@ public class deepdive_drive_imu extends LinearOpMode {
     }
 
     if (armPower == 0) {
-      if (gamepad2.dpad_up) {
-//        targetPot = -1387;
-      } else if (gamepad2.dpad_down) {
-//        targetPot = -229;
-      } else if (armPowerApplied) {
-          targetPot = potValue;
-        armPowerApplied = false;
-      }
-      totalPotCorrection = potError * 0.02 + potChange * 0.07 + potIntegral * 0.02;
-      armPower = totalPotCorrection;
+//      arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//      arm.setTargetPosition(arm.getCurrentPosition());
+//      arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//      if (gamepad2.dpad_up) {
+////        targetPot = -1387;
+//      } else if (gamepad2.dpad_down) {
+////        targetPot = -229;
+//      } else if (armPowerApplied) {
+////          targetPot = potValue;
+//        armPowerApplied = false;
+//      }
+//
+//      arm.setTargetPosition((int) (ratio * targetPot));
+//      armPower = 0.0; // 0.5;
 
     } else {
       armPowerApplied = true;
