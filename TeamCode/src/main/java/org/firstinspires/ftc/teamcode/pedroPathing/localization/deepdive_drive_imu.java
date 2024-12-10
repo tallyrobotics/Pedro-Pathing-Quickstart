@@ -49,6 +49,9 @@ public class deepdive_drive_imu extends LinearOpMode {
   double headingError;
   double correctionFactor = 2;
 
+  private int currentEncoderPos = 0;
+  private int prevEncoderPos = 0;
+
   double potValue = 0;
   double targetPot = 0;
   double potChange = 0;
@@ -65,6 +68,7 @@ public class deepdive_drive_imu extends LinearOpMode {
   double armPower = 0;
   boolean armPowerApplied = true;
   int armTargetPosition = 0;
+  int armTargetOffset = 0;
 
   double wristPower = 0;
   boolean wristPowerApplied = true;
@@ -153,6 +157,10 @@ public class deepdive_drive_imu extends LinearOpMode {
     imu.resetYaw();
 
     while (opModeIsActive()) {
+      arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      prevEncoderPos = currentEncoderPos;
+      currentEncoderPos = arm.getCurrentPosition();
+
       // Put loop blocks here.
 //      pos = sensor_otos.getPosition();
       omniDrive();
@@ -325,16 +333,16 @@ public class deepdive_drive_imu extends LinearOpMode {
 
     if (gamepad2.left_bumper) {
       armScale = 0.35;
-      wristScale = 0.3;
+      wristScale = 0.5;
     } else if (gamepad2.right_bumper) {
       armScale = 0.7;
-      wristScale = 0.45;
+      wristScale = 0.9;
     } else if (isYPressed == true) {
-      armScale = 1;
+      armScale = 0.8;
     }
     else{
       armScale = 0.5;
-      wristScale = 0.35;
+      wristScale = 1;
     }
 
     // toggle logic for field centric
@@ -362,9 +370,6 @@ public class deepdive_drive_imu extends LinearOpMode {
     } else {
       intake.setPower(0);
     }
-
-
-
 
     axial = -gamepad1.left_stick_y;
     lateral = gamepad1.left_stick_x;
@@ -448,18 +453,22 @@ public class deepdive_drive_imu extends LinearOpMode {
     }
 
     if (wristPower == 0) {
-//      wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//      wristPower = 0.6;
-//
-//      if (gamepad2.dpad_up) {
-//        wristTargetPosition = 7;
-//      } else if (gamepad2.dpad_down) {
-//        wristTargetPosition = 7;
-//      } else if (wristPowerApplied) {
-//        wristPowerApplied = false;
-//        wristTargetPosition = wrist.getCurrentPosition();
-//      }
-//      wrist.setTargetPosition(wristTargetPosition);
+      wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      wristPower = 0.6;
+
+      if (gamepad2.dpad_up) {
+        wristTargetPosition = 388;
+      } else if (gamepad2.dpad_down) {
+        wristTargetPosition = 396;
+      } else if (gamepad2.dpad_left) {
+        wristTargetPosition = 25;
+      } else if (gamepad2.dpad_right) {
+        wristTargetPosition = 25;
+      } else if (armPowerApplied) {
+        wristTargetPosition = wrist.getCurrentPosition();
+        armPowerApplied = false;
+      }
+      wrist.setTargetPosition(wristTargetPosition);
     } else {
       wristPowerApplied = true;
       wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -467,21 +476,31 @@ public class deepdive_drive_imu extends LinearOpMode {
     }
 
     if (armPower == 0) {
-//      arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//      arm.setTargetPosition(arm.getCurrentPosition());
-//      arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//
-//      if (gamepad2.dpad_up) {
-////        targetPot = -1387;
-//      } else if (gamepad2.dpad_down) {
-////        targetPot = -229;
-//      } else if (armPowerApplied) {
-////          targetPot = potValue;
-//        armPowerApplied = false;
-//      }
-//
-//      arm.setTargetPosition((int) (ratio * targetPot));
-//      armPower = 0.0; // 0.5;
+      arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      arm.setTargetPosition(arm.getCurrentPosition());
+      arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+      if (gamepad2.dpad_up) {
+        targetPot = 0.576;
+      } else if (gamepad2.dpad_down) {
+        targetPot = 0.277;
+      } else if (gamepad2.dpad_left) {
+        targetPot = 0.648;
+      } else if (gamepad2.dpad_right) {
+        targetPot = 0.199;
+      } else if (armPowerApplied) {
+        targetPot = potValue;
+        armPowerApplied = false;
+      }
+
+      armTargetPosition = (int) (ratio * targetPot);
+
+      if (potChange == 0.0) {
+        armTargetOffset += currentEncoderPos - prevEncoderPos;
+      }
+
+      arm.setTargetPosition(armTargetPosition + armTargetOffset);
+      armPower = 0.8;
 
     } else {
       armPowerApplied = true;
@@ -502,7 +521,8 @@ public class deepdive_drive_imu extends LinearOpMode {
     telemetry.addData("Status", "Run Time: " + runtime);
     telemetry.addData("Front left/Right", JavaUtil.formatNumber(leftFrontPower, 4, 2) + ", " + JavaUtil.formatNumber(rightFrontPower, 4, 2));
     telemetry.addData("Back  left/Right", JavaUtil.formatNumber(leftBackPower, 4, 2) + ", " + JavaUtil.formatNumber(rightBackPower, 4, 2));
-    telemetry.addData("pot", pot.getVoltage());
+    telemetry.addData("targetPos", arm.getTargetPosition());
+    telemetry.addData("currentPos", arm.getCurrentPosition());
 
     prevHeading = heading;
   }

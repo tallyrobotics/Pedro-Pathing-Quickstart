@@ -33,7 +33,7 @@ public class runPedroRightAuto extends OpMode
     private int prevEncoderPos = 0;
     private int currentEncoderPos = 0;
     private int targetEncoderPos;
-    final double ratio = 2200;
+    final double ratio = 1100;
 
     /**
      * This initializes the Follower and creates the forward and backward Paths. Additionally, this
@@ -92,7 +92,7 @@ public class runPedroRightAuto extends OpMode
         if (prevPot < 0.05) {
             targetEncoderPos += currentEncoderPos - prevEncoderPos;
         }
-        arm.setTargetPosition((int) targetEncoderPos);
+        arm.setTargetPosition(targetEncoderPos);
     }
 
     private void updateTargetEncoderPosition(double newPot) {

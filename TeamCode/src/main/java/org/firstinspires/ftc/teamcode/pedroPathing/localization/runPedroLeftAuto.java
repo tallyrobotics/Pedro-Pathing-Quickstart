@@ -35,7 +35,7 @@ public class runPedroLeftAuto extends OpMode
     private int prevEncoderPos = 0;
     private int currentEncoderPos = 0;
     private int targetEncoderPos;
-    final double ratio = 2200;
+    final double ratio = 1100;
 
 
     /**
@@ -95,7 +95,7 @@ public class runPedroLeftAuto extends OpMode
         if (prevPot < 0.05) {
             targetEncoderPos += currentEncoderPos - prevEncoderPos;
         }
-        arm.setTargetPosition((int) targetEncoderPos);
+        arm.setTargetPosition(targetEncoderPos);
     }
 
     private void updateTargetEncoderPosition(double newPot) {
