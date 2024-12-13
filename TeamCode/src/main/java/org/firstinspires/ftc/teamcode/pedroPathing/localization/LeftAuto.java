@@ -35,27 +35,23 @@ public class LeftAuto extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         arm = hardwareMap.get(DcMotor.class, "arm");
-        armOther = hardwareMap.get(DcMotor.class, "armOther");
         claw = hardwareMap.get(Servo.class, "claw");
         wrist = hardwareMap.get(DcMotor.class, "wrist");
 
+        arm.setDirection(DcMotor.Direction.REVERSE);
+
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armOther.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         arm.setTargetPosition(0);
-        armOther.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armOther.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.5);
-        armOther.setPower(0.5);
+        arm.setPower(0.7);
 
         claw.scaleRange(0.5, 1);
 
         backRight.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
-        armOther.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -73,52 +69,57 @@ public class LeftAuto extends LinearOpMode {
             telemetry.update();
 
             // raising arm
-            arm.setTargetPosition(5200);
-            armOther.setTargetPosition(5200);
+            arm.setTargetPosition(4200);
             sleep(1500);
 
             // move forward to get into position to place specimen
-            move(0.2, 3.85);
+            move(0.4, 1.42);
+            claw.setPosition(1);
             sleep(1000);
 
             // drop arm
-            arm.setTargetPosition(4500);
-            armOther.setTargetPosition(4500);
-            sleep(1000);
+            backLeft.setPower(0.12);
+            backRight.setPower(0.12);
+            frontLeft.setPower(0.12);
+            frontRight.setPower(0.12);
+            arm.setTargetPosition(400);
+            sleep(1500);
+            stopMotors();
             arm.setPower(0);
-            armOther.setPower(0);
             // open claw
             claw.setPosition(0);
             // raise arm out of the beam
             arm.setPower(0.5);
-            armOther.setPower(0.5);
-            arm.setTargetPosition(5200);
-            armOther.setTargetPosition(5200);
-            sleep(1000);
+            arm.setTargetPosition(3250);
+            sleep(2000);
 
-            // hopefully park?????
-            move(-0.2, 1.5);
-            arm.setTargetPosition(6000);
-            armOther.setTargetPosition(6000);
+            // 3 samples and park
+            move(-0.4, 0.75);
+            arm.setTargetPosition(4500);
             sleep(150);
-            strafe(-0.4, 2);
+            strafe(-0.8, 0.92);
             sleep(150);
-            move(0.2, 4.15);
+            move(0.8, 1);
             sleep(150);
-            /*
-
-             */
-            turnClockwiseToAngle(100);
-            move(0.2, 1.3);
-            sleep(150);
-
+            strafe(-0.8, 0.3);
+            sleep(100);
+            turnClockwiseToAngle(15);
+            move(-0.8, 1.1);
+            turnCounterclockwiseToAngle(15);
+            moveStraight(0.8, 1.1);
+            strafe(-0.8, 0.4);
+            moveStraight(-0.8, 1.3);
+            moveStraight(0.8, 1.3);
+            strafe(-0.8, 0.4);
+            moveStraight(-0.8, 1.1);
+            moveStraight(0.8, 1.1);
+            strafe(0.6, 1.0);
+            turnClockwiseToAngle(89);
+            move(0.4, 1.0);
             arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            armOther.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             arm.setPower(-0.05);
-            armOther.setPower(-0.05);
             sleep(2000);
             arm.setPower(0);
-            armOther.setPower(0);
 
             // just to make sure everything is completely off
             stopMotors();
@@ -194,7 +195,7 @@ public class LeftAuto extends LinearOpMode {
             headingError -= 360;
         }
 
-        while ((headingError > 15) && (opModeIsActive())) {
+        while ((headingError > 7) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
@@ -231,7 +232,7 @@ public class LeftAuto extends LinearOpMode {
             headingError -= 360;
         }
 
-        while ((headingError > 15) && (opModeIsActive())) {
+        while ((headingError > 7) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
@@ -257,6 +258,46 @@ public class LeftAuto extends LinearOpMode {
 
     public void move(double axial, double time) {
         double currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
+        double previousHeading = currentHeading;
+        double headingDiff = 0.0;
+        double target = currentHeading;
+        double headingError = 0.0;
+
+        double startTime = getRuntime();
+        double yaw = 0;
+
+
+        while ((getRuntime() < (startTime + time)) && (opModeIsActive())) {
+            currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
+            headingDiff = currentHeading - previousHeading;
+            if (Math.abs(headingDiff + 360) < Math.abs(headingDiff)) {
+                headingDiff += 360;
+            } else if (Math.abs(headingDiff - 360) < Math.abs(headingDiff)) {
+                headingDiff -= 360;
+            }
+            headingError = target - currentHeading;
+            if (Math.abs(headingError + 360) < Math.abs(headingError)) {
+                headingError += 360;
+            } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
+                headingError -= 360;
+            }
+
+            // negative around whole thing because positive yaw makes robot turn right while heading is measured counterclockwise
+            yaw = -(headingError * 0.03 - headingDiff * 0.02);
+
+            backLeft.setPower(axial + yaw);
+            backRight.setPower(axial - yaw);
+            frontLeft.setPower(axial + yaw);
+            frontRight.setPower(axial - yaw);
+
+            previousHeading = currentHeading;
+        }
+
+        stopMotors();
+    }
+
+    public void moveStraight(double axial, double time) {
+        double currentHeading = 0;
         double previousHeading = currentHeading;
         double headingDiff = 0.0;
         double target = currentHeading;
