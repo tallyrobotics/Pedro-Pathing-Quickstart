@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
+//package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
-public class RightAuto extends LinearOpMode {
+public class AutoRightHang extends LinearOpMode {
     private IMU imu;
     private DcMotor backLeft;
     private DcMotor backRight;
@@ -73,10 +73,10 @@ public class RightAuto extends LinearOpMode {
             // raising arm
             arm.setTargetPosition(4200);
             arm.setPower(1);
-            sleep(750);
+            sleep(600);
 
             // move forward to get into position to place specimen
-            move(0.4, 1.32);
+            move(0.4, 1.42);
             claw.setPosition(1);
 
             // drop arm
@@ -86,7 +86,7 @@ public class RightAuto extends LinearOpMode {
             frontLeft.setPower(0.12);
             frontRight.setPower(0.12);
             arm.setTargetPosition(2500);
-            sleep(1750);
+            sleep(1500);
             stopMotors();
             arm.setPower(0);
             // open claw
@@ -96,62 +96,59 @@ public class RightAuto extends LinearOpMode {
             arm.setTargetPosition(3250);
             sleep(750);
 
-
             // 3 samples and park
             move(-0.4, 0.75);
             arm.setPower(0.5);
             arm.setTargetPosition(500);
             sleep(150);
-            strafe(0.8, 0.95);
+            strafe(0.8, 0.9);
             sleep(150);
-            move(0.85, 0.9);
+            move(0.85, 0.85);
             sleep(150);
             //first cycle
-            strafe(0.8, 0.35);
+            strafe(0.8, 0.41);
             moveStraight(-0.8, 1.22);
-            moveStraight(0.8, 1.22);
+            moveStraight(0.8, 1.2);
             //second cycle
             strafe(0.8, 0.41);
-            moveStraight(-0.8, 1.25);
-            moveStraight(0.8, 1.25);
+            moveStraight(-0.8, 1.2);
+            moveStraight(0.8, 1.2);
             //third cycle
             strafe(0.8, 0.41);
             moveStraight(-0.8, 1.2);
             //get specimen
-            arm.setTargetPosition(1775);
-            strafe(-0.8, 0.55);
+            arm.setTargetPosition(1780);
+            strafe(-0.8, 0.4);
             moveStraight(-0.8, 0.4);
             sleep(150);
             moveStraight(0.8, 0.4);
             turnClockwiseToAngle(179);
-
-            backLeft.setPower(0.2);
-            backRight.setPower(0.2);
-            frontLeft.setPower(0.2);
-            frontRight.setPower(0.2);
-            sleep(1030);
+                        
+            backLeft.setPower(0.3);
+            backRight.setPower(0.3);
+            frontLeft.setPower(0.3);
+            frontRight.setPower(0.3);
+            sleep(630);
             stopMotors();
-            //picks up
             claw.setPosition(1);
-            sleep(250);
-            arm.setTargetPosition(4000);
-            sleep(250);
 
+            sleep(500);
+            arm.setTargetPosition(4200);
+            
             //clip on
             move(-0.8, 0.2);
             turnClockwiseToAngle(90);
-            sleep(500);
-            move(0.8, 1.28);
+            move(0.8, 1.75);
             turnClockwiseToAngle(90);
-            moveStraight(0.65, 0.65);
-            arm.setTargetPosition(3000);
-            sleep(750);
-            claw.setPosition(0);
-            sleep(750);
+            move(0.6, 0.8);
+            arm.setTargetPosition(2750);
+            
 
             // park
-            moveStraight(-0.8, 0.6);
-            strafe(0.8, 1.5);
+//            arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//            arm.setPower(-0.05);
+//            sleep(2000);
+//            arm.setPower(0);
 
             // just to make sure everything is completely off
             stopMotors();
@@ -220,19 +217,20 @@ public class RightAuto extends LinearOpMode {
             idealHeading -= 360;
         }
 
-        double headingError = idealHeading - currentHeading;
+        double headingError = Math.abs(currentHeading - idealHeading);
         if (Math.abs(headingError + 360) < Math.abs(headingError)) {
             headingError += 360;
         } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
             headingError -= 360;
         }
 
-        while ((headingError < -3) && (opModeIsActive())) {
+        while ((headingError > 7) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
             currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
-            headingError = idealHeading - currentHeading;
+
+            headingError = Math.abs(currentHeading - idealHeading);
             if (Math.abs(headingError + 360) < Math.abs(headingError)) {
                 headingError += 360;
             } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
@@ -256,21 +254,21 @@ public class RightAuto extends LinearOpMode {
             idealHeading -= 360;
         }
 
-        double headingError = idealHeading - currentHeading;
+        double headingError = Math.abs(currentHeading - idealHeading);
         if (Math.abs(headingError + 360) < Math.abs(headingError)) {
             headingError += 360;
         } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
             headingError -= 360;
         }
 
-        while ((headingError > 3) && (opModeIsActive())) {
+        while ((headingError > 7) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
 
             currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
 
-            headingError = idealHeading - currentHeading;
+            headingError = Math.abs(currentHeading - idealHeading);
             if (Math.abs(headingError + 360) < Math.abs(headingError)) {
                 headingError += 360;
             } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {

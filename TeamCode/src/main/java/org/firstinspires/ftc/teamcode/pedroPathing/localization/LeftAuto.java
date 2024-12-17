@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -20,9 +21,11 @@ public class LeftAuto extends LinearOpMode {
     private DcMotor armOther;
     private Servo claw;
     private DcMotor wrist;
+    private AnalogInput pot;
 
     @Override
     public void runOpMode() {
+        pot = hardwareMap.get(AnalogInput.class, "pot");
         imu = hardwareMap.get(IMU.class, "imu");
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
@@ -91,28 +94,31 @@ public class LeftAuto extends LinearOpMode {
             // raise arm out of the beam
             arm.setPower(0.5);
             arm.setTargetPosition(3250);
-            sleep(2000);
+            sleep(1500);
 
             // 3 samples and park
             move(-0.4, 0.75);
             arm.setTargetPosition(4500);
             sleep(150);
-            strafe(-0.8, 0.92);
+            strafe(-0.8, 0.95);
             sleep(150);
             move(0.8, 1);
             sleep(150);
-            strafe(-0.8, 0.3);
+            // first cycle
+            strafe(-0.8, 0.35);
             sleep(100);
-            turnClockwiseToAngle(15);
-            move(-0.8, 1.1);
-            turnCounterclockwiseToAngle(15);
-            moveStraight(0.8, 1.1);
+            turnClockwiseToAngle(8);
+            move(-0.8, 1.15);
+            turnCounterclockwiseToAngle(8);
+            moveStraight(0.8, 1.15);
+            //second cycle
             strafe(-0.8, 0.4);
-            moveStraight(-0.8, 1.3);
+            moveStraight(-0.8, 1.35);
+            moveStraight(0.8, 1.4);
+            // third cycle
+            strafe(-0.8, 0.43);
+            moveStraight(-0.8, 1.2);
             moveStraight(0.8, 1.3);
-            strafe(-0.8, 0.4);
-            moveStraight(-0.8, 1.1);
-            moveStraight(0.8, 1.1);
             strafe(0.6, 1.0);
             turnClockwiseToAngle(89);
             move(0.4, 1.0);
@@ -188,30 +194,29 @@ public class LeftAuto extends LinearOpMode {
             idealHeading -= 360;
         }
 
-        double headingError = Math.abs(currentHeading - idealHeading);
+        double headingError = idealHeading - currentHeading;
         if (Math.abs(headingError + 360) < Math.abs(headingError)) {
             headingError += 360;
         } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
             headingError -= 360;
         }
 
-        while ((headingError > 7) && (opModeIsActive())) {
+        while ((headingError < -3) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
             currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
-
-            headingError = Math.abs(currentHeading - idealHeading);
+            headingError = idealHeading - currentHeading;
             if (Math.abs(headingError + 360) < Math.abs(headingError)) {
                 headingError += 360;
             } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
                 headingError -= 360;
             }
 
-            backLeft.setPower(0.2);
-            backRight.setPower(-0.2);
-            frontLeft.setPower(0.2);
-            frontRight.setPower(-0.2);
+            backLeft.setPower(0.5);
+            backRight.setPower(-0.5);
+            frontLeft.setPower(0.5);
+            frontRight.setPower(-0.5);
         }
         stopMotors();
     }
@@ -225,31 +230,31 @@ public class LeftAuto extends LinearOpMode {
             idealHeading -= 360;
         }
 
-        double headingError = Math.abs(currentHeading - idealHeading);
+        double headingError = idealHeading - currentHeading;
         if (Math.abs(headingError + 360) < Math.abs(headingError)) {
             headingError += 360;
         } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
             headingError -= 360;
         }
 
-        while ((headingError > 7) && (opModeIsActive())) {
+        while ((headingError > 3) && (opModeIsActive())) {
             telemetry.addData("Error",headingError);
             telemetry.update();
 
 
             currentHeading = imu.getRobotYawPitchRollAngles().getYaw();
 
-            headingError = Math.abs(currentHeading - idealHeading);
+            headingError = idealHeading - currentHeading;
             if (Math.abs(headingError + 360) < Math.abs(headingError)) {
                 headingError += 360;
             } else if (Math.abs(headingError - 360) < Math.abs(headingError)) {
                 headingError -= 360;
             }
 
-            backLeft.setPower(-0.2);
-            backRight.setPower(0.2);
-            frontLeft.setPower(-0.2);
-            frontRight.setPower(0.2);
+            backLeft.setPower(-0.5);
+            backRight.setPower(0.5);
+            frontLeft.setPower(-0.5);
+            frontRight.setPower(0.5);
         }
 
         stopMotors();

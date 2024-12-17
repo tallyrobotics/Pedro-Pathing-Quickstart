@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +8,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
-public class RightAuto extends LinearOpMode {
+public class LeftAutoWithWait extends LinearOpMode {
     private IMU imu;
     private DcMotor backLeft;
     private DcMotor backRight;
@@ -70,88 +69,63 @@ public class RightAuto extends LinearOpMode {
             telemetry.addData("Status", "Running");
             telemetry.update();
 
+            // initial wait
+            sleep(8000);
             // raising arm
             arm.setTargetPosition(4200);
-            arm.setPower(1);
-            sleep(750);
+            sleep(1500);
 
             // move forward to get into position to place specimen
-            move(0.4, 1.32);
+            move(0.4, 1.42);
             claw.setPosition(1);
+            sleep(1000);
 
             // drop arm
-            arm.setPower(0.7);
             backLeft.setPower(0.12);
             backRight.setPower(0.12);
             frontLeft.setPower(0.12);
             frontRight.setPower(0.12);
-            arm.setTargetPosition(2500);
-            sleep(1750);
+            arm.setTargetPosition(400);
+            sleep(1500);
             stopMotors();
             arm.setPower(0);
             // open claw
             claw.setPosition(0);
             // raise arm out of the beam
-            arm.setPower(1);
+            arm.setPower(0.5);
             arm.setTargetPosition(3250);
-            sleep(750);
-
+            sleep(1500);
 
             // 3 samples and park
             move(-0.4, 0.75);
-            arm.setPower(0.5);
-            arm.setTargetPosition(500);
+            arm.setTargetPosition(4500);
             sleep(150);
-            strafe(0.8, 0.95);
+            strafe(-0.8, 0.92);
             sleep(150);
-            move(0.85, 0.9);
+            move(0.8, 1);
             sleep(150);
-            //first cycle
-            strafe(0.8, 0.35);
-            moveStraight(-0.8, 1.22);
-            moveStraight(0.8, 1.22);
+            // first cycle
+            strafe(-0.8, 0.38);
+            sleep(100);
+            turnClockwiseToAngle(8);
+            move(-0.8, 1.1);
+            turnCounterclockwiseToAngle(8);
+            moveStraight(0.8, 1.1);
             //second cycle
-            strafe(0.8, 0.41);
-            moveStraight(-0.8, 1.25);
-            moveStraight(0.8, 1.25);
-            //third cycle
-            strafe(0.8, 0.41);
-            moveStraight(-0.8, 1.2);
-            //get specimen
-            arm.setTargetPosition(1775);
-            strafe(-0.8, 0.55);
-            moveStraight(-0.8, 0.4);
-            sleep(150);
-            moveStraight(0.8, 0.4);
-            turnClockwiseToAngle(179);
-
-            backLeft.setPower(0.2);
-            backRight.setPower(0.2);
-            frontLeft.setPower(0.2);
-            frontRight.setPower(0.2);
-            sleep(1030);
-            stopMotors();
-            //picks up
-            claw.setPosition(1);
-            sleep(250);
-            arm.setTargetPosition(4000);
-            sleep(250);
-
-            //clip on
-            move(-0.8, 0.2);
-            turnClockwiseToAngle(90);
-            sleep(500);
-            move(0.8, 1.28);
-            turnClockwiseToAngle(90);
-            moveStraight(0.65, 0.65);
-            arm.setTargetPosition(3000);
-            sleep(750);
-            claw.setPosition(0);
-            sleep(750);
-
-            // park
-            moveStraight(-0.8, 0.6);
-            strafe(0.8, 1.5);
+            strafe(-0.8, 0.4);
+            moveStraight(-0.8, 1.3);
+            moveStraight(0.8, 1.3);
+            // third cycle
+            strafe(-0.8, 0.45);
+            moveStraight(-0.8, 1.1);
+            moveStraight(0.8, 1.15);
+            strafe(0.6, 1.0);
+            turnClockwiseToAngle(89);
+            move(0.4, 1.0);
+            arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            arm.setPower(-0.05);
+            sleep(2000);
+            arm.setPower(0);
 
             // just to make sure everything is completely off
             stopMotors();
