@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.localization;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -15,15 +13,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @Autonomous
-public class LeftAutoJTracking extends LinearOpMode {
+public class JTLeftAutoSpecimens extends LinearOpMode {
     private DcMotor backLeft;
     private DcMotor backRight;
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor arm;
     private Servo claw;
-
-    private Telemetry telemetryA;
 
     private SparkFunOTOS otos;
 
@@ -51,45 +47,86 @@ public class LeftAutoJTracking extends LinearOpMode {
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.7);
+        arm.setPower(1);
 
         claw.scaleRange(0.5, 1);
 
-        otos.setOffset(new SparkFunOTOS.Pose2D(0.075, 3.40625, 0));
-        otos.setLinearScalar(1.0739); //0.9637
-        otos.setAngularScalar(0.9798);
-
-        otos.setLinearUnit(DistanceUnit.INCH);
-        otos.setAngularUnit(AngleUnit.DEGREES);
-
-        otos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
-        otos.resetTracking();
-
         JTracking tracker = new JTracking(this, hardwareMap);
+        /* it's easier to set the back wall to be x = 0, but if we want to reuse positions for
+        left and right autos, we have to use specific y values for the starting position. */
+        tracker.setPosition(new SparkFunOTOS.Pose2D(0, 15.75, 0));
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         while (opModeIsActive()) {
-
-            // put all movement code here
+        // 1st specimen
             claw.setPosition(1);
             arm.setTargetPosition(4180);
-            sleep(3000);
-            tracker.moveTo(26, -9, 0, 0.6);
-            sleep(1000);
+            sleep(1500);
+            tracker.moveTo(26, 6.75, 0, 0.1, 0.5);
             tracker.setMotors(0.15, 0.15, 0.15, 0.15);
             arm.setTargetPosition(3250);
-            sleep(2500);
+            sleep(1500);
             tracker.stopMotors();
-            arm.setPower(0.7);
             // open claw
             claw.setPosition(0);
-            sleep(1500);
-            tracker.moveTo(22, -9, 0, 0.6);
-            tracker.moveTo(22, -64, 180, 0.6);
+            sleep(500);
 
-            //stalls until time runs out
+        // human player 1st cycle
+            // move to human player
+            tracker.moveTo(22, 6.75, 0, 1, 0.5);
+            arm.setTargetPosition(1775);
+            tracker.moveTo(26, -36, 0, 1, 0.5);
+            tracker.moveTo(52, -36, 0, 1, 0.5);
+            tracker.moveTo(52, -48, 0, 1, 0.5);
+            // 1
+            tracker.moveTo(10, -48, 0, 1, 0.5);
+            tracker.moveTo(52, -48, 0, 1, 0.5);
+            tracker.moveTo(52, -60, 0, 1, 0.5);
+            // 2
+            tracker.moveTo(10, -60, 0, 1, 0.5);
+            // turn to get 1
+            tracker.moveTo(28, -60, 180, 1, 0.5);
+            tracker.moveTo(6, -60, 180, 0.1, 0.5);
+            claw.setPosition(1);
+            sleep(500);
+            // back away
+            tracker.moveTo(6, -60, 180, 1, 0.5);
+
+        // 2nd specimen
+            arm.setTargetPosition(4180);
+            tracker.moveTo(26, 6.75, 0, 0.1, 0.5);
+            tracker.setMotors(0.15, 0.15, 0.15, 0.15);
+            arm.setTargetPosition(3250);
+            sleep(1500);
+            tracker.stopMotors();
+            // open claw
+            claw.setPosition(0);
+            sleep(500);
+
+        // human player 2nd cycle
+            // get 2
+            tracker.moveTo(28, -60, 180, 1, 0.5);
+            tracker.moveTo(6, -60, 180, 0.1, 0.5);
+            claw.setPosition(1);
+            sleep(500);
+            // back away
+            tracker.moveTo(6, -60, 180, 1, 0.5);
+
+        // 3rd specimen
+            arm.setTargetPosition(4180);
+            tracker.moveTo(26, 6.75, 0, 0.1, 0.5);
+            tracker.setMotors(0.15, 0.15, 0.15, 0.15);
+            arm.setTargetPosition(3250);
+            sleep(1500);
+            tracker.stopMotors();
+            // open claw
+            claw.setPosition(0);
+        // park
+            tracker.moveTo(5, -72, 0, 1, 0.5);
+
+        //stalls until time runs out
             while (opModeIsActive()) {
                 sleep(1000);
             }

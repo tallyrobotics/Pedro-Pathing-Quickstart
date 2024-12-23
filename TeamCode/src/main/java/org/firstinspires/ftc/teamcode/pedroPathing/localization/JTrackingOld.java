@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class JTracking {
+public class JTrackingOld {
     private LinearOpMode opMode;
     private HardwareMap hardwareMap;
 
@@ -22,33 +22,25 @@ public class JTracking {
     private DcMotor arm;
     private Servo claw;
 
-    private Telemetry telemetryAll;
+    private Telemetry telemetryA;
     private SparkFunOTOS otos;
 
     // tune these values to the point where moveFieldCentric(1, 1, 0, 0.2, 0) moves it exactly diagonally to the top-right
     final double forwardFactor = 1.0;
-    final double strafeFactor = 1.4;
+    final double strafeFactor = 1.0;
+    final double headingErrorTolerance = 1.0;
 
-//    final double posErrorTolerance = 0.05;
-//    final double headingErrorTolerance = 0.5;
+    final double minErrorTolerance = 0.05;
+    final double reductionErrorTolerance = 12.0;
+    final int reductionCycles = 5;
+    final double stoppingPower = 0.1;
 
-    final double position_p = 0.09;
-    final double position_d = 0.02;
+    final double maxYawPower = 0.4;
 
-    final double heading_p = 0.09;
-    final double heading_d = 0.04;
-
-    // we add minimum powers to prevent it from halting and never reaching the target.
-    // at 0.1 movement power, it can pretty much stop as soon as it wants to.
-    final double maxPower = 0.80;
-    final double minPower = 0.11;
-
-    final double maxYaw = 0.75;
-    final double minYaw = 0.05;
-
-    public JTracking(LinearOpMode initOpMode, HardwareMap initHardwareMap) {
+    public JTrackingOld(LinearOpMode initOpMode, HardwareMap initHardwareMap) {
         opMode = initOpMode;
         hardwareMap = initHardwareMap;
+
 
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
@@ -67,7 +59,7 @@ public class JTracking {
 
         otos.setOffset(new SparkFunOTOS.Pose2D(0.075, 3.40625, 0));
         otos.setLinearScalar(1.0739); //0.9637
-        otos.setAngularScalar(1.000); //0.9798
+        otos.setAngularScalar(0.9798);
 
         otos.setLinearUnit(DistanceUnit.INCH);
         otos.setAngularUnit(AngleUnit.DEGREES);
@@ -75,16 +67,13 @@ public class JTracking {
         otos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
         otos.resetTracking();
 
-        telemetryAll = new MultipleTelemetry(opMode.telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetryAll.addData("Status", "Initialized");
-        telemetryAll.update();
+        telemetryA = new MultipleTelemetry(opMode.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryA.addData("Status", "Initialized");
+        telemetryA.update();
     }
 
+    // Coordinate system: (0,0) is the center of the 4 central tiles, 1 unit is 1 inch
     // angle of 0 is pointing in +X direction, angles increase COUNTERCLOCKWISE
-
-    public void setPosition(SparkFunOTOS.Pose2D pose) {
-        otos.setPosition(pose);
-    }
 
     public void setMotors(double bl, double br, double fl, double fr) {
         backLeft.setPower(bl);
@@ -114,13 +103,13 @@ public class JTracking {
         double normalizedY = scaledY / d;
 
         // we initialize
-        double lateral = normalizedX * Math.sin(heading / 180 * Math.PI) - normalizedY * Math.cos(heading / 180 * Math.PI);
-        double axial = normalizedX * Math.cos(heading / 180 * Math.PI) + normalizedY * Math.sin(heading / 180 * Math.PI);
+        double newLateral = normalizedX * Math.sin(heading / 180 * Math.PI) - normalizedY * Math.cos(heading / 180 * Math.PI);
+        double newAxial = normalizedX * Math.cos(heading / 180 * Math.PI) + normalizedY * Math.sin(heading / 180 * Math.PI);
 
-        lateral *= power;
-        axial *= power;
+        newAxial *= power;
+        newLateral *= power;
 
-        setMotorsOmni(axial, lateral, yaw);
+        setMotorsOmni(newAxial, newLateral, yaw);
     }
 
     public double getError(double targetX, double targetY, double currentX, double currentY) {
@@ -134,33 +123,23 @@ public class JTracking {
         return ((angle + 180.0) % 360.0) - 180.0;
     }
 
-    public double constrainPower(double min, double max, double power) {
-        double absPower = Math.abs(power);
-        double sign = Math.signum(power);
-
-        return sign * Math.min(Math.max(absPower, min), max);
-    }
-
-    public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance) {
+    public void moveTo(double targetX, double targetY, double targetHeading, double power) {
         SparkFunOTOS.Pose2D pos = otos.getPosition();
 
+        double powerReductionFactor = Math.pow(stoppingPower / power, 1.0 / reductionCycles);
+        double toleranceReductionFactor = Math.pow(minErrorTolerance / reductionErrorTolerance, 1.0 / reductionCycles);
+
+        double changingTolerance = reductionErrorTolerance;
+        double changingPower = power;
+
+
         double yaw = 0;
-        double power = 0;
         double errorX = targetX - pos.x;
         double errorY = targetY - pos.y;
-
         double posError = Math.sqrt(errorX*errorX + errorY*errorY);
-        double prevPosError = posError;
-        double posErrorDiff = 0;
-
         double headingError = minimizeAngle(targetHeading - pos.h);
-        double prevHeadingError = headingError;
-        double headingErrorDiff = 0;
 
-        while (opMode.opModeIsActive() && ((posError > posErrorTolerance) || (Math.abs(headingError) > headingErrorTolerance))) {
-            prevPosError = posError;
-            prevHeadingError = headingError;
-
+        while (opMode.opModeIsActive() && ((posError > minErrorTolerance) || (Math.abs(headingError) > headingErrorTolerance))) {
             // recalculate position and error
             pos = otos.getPosition();
 
@@ -170,25 +149,28 @@ public class JTracking {
             posError = Math.sqrt(errorX*errorX + errorY*errorY);
             headingError = minimizeAngle(targetHeading - pos.h);
 
-            posErrorDiff = posError - prevPosError;
-            headingErrorDiff = headingError - prevHeadingError;
+            telemetryA.addData("current tolerance",  changingTolerance);
+            telemetryA.addData("min tolerance", minErrorTolerance);
+            telemetryA.addData("reduction factor", powerReductionFactor);
+            telemetryA.addData("power", changingPower);
+            telemetryA.addData("heading", pos.h);
+            telemetryA.update();
 
+            // potential pid controller may help
             // remember: positive yaw means rotation COUNTERCLOCKWISE
-            yaw = heading_p * headingError + heading_d * headingErrorDiff;
-            yaw = constrainPower(minYaw, maxYaw, yaw);
+            yaw = 0.02 * headingError;
+            yaw = Math.min(Math.max(-maxYawPower, yaw), maxYawPower);
 
-            power = position_p * posError + position_d * posErrorDiff;
-            power = constrainPower(minPower, maxPower, power);
-
-            telemetryAll.addData("posError", posError);
-            telemetryAll.addData("yaw", yaw);
-            telemetryAll.addData("power", power);
-            telemetryAll.addData("y", pos.y);
-            telemetryAll.addData("x", pos.x);
-            telemetryAll.update();
+            if (posError < changingTolerance) {
+                changingTolerance *= toleranceReductionFactor;
+                changingPower *= powerReductionFactor;
+            } else if (posError * toleranceReductionFactor > changingTolerance) {
+                changingTolerance /= toleranceReductionFactor;
+                changingPower /= powerReductionFactor;
+            }
 
             // using error x and y, we know the exact direction we need to travel in the x and y directions
-            moveFieldCentric(errorX, errorY, pos.h, power, yaw);
+            moveFieldCentric(errorX, errorY, pos.h, changingPower, yaw);
         }
 
         stopMotors();
