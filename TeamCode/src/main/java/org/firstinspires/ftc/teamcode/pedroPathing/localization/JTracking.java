@@ -164,6 +164,8 @@ public class JTracking {
         double prevHeadingError = headingError;
         double headingErrorDiff = 0;
 
+        int haltTimer = 0;
+
         while (opMode.opModeIsActive() && ((posError > posErrorTolerance) || (Math.abs(headingError) > headingErrorTolerance))) {
             prevPosError = posError;
             prevHeadingError = headingError;
@@ -196,6 +198,17 @@ public class JTracking {
 
             // using error x and y, we know the exact direction we need to travel in the x and y directions
             moveFieldCentric(errorX, errorY, pose.h, power, yaw);
+
+            // if we have halted for some reason (likely because of hitting a wall)
+            if (Math.abs(posErrorDiff) < 0.05) {
+                haltTimer++;
+            } else {
+                haltTimer = 0;
+            }
+
+            if (haltTimer > 30) {
+                break;
+            }
         }
 
         stopMotors();
