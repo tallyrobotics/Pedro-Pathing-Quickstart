@@ -33,14 +33,14 @@ public class JTracking {
 //    final double headingErrorTolerance = 0.5;
 
     final double position_p = 0.09;
-    final double position_d = 0.02;
+    final double position_d = 0.03;
 
     final double heading_p = 0.09;
     final double heading_d = 0.04;
 
     // we add minimum powers to prevent it from halting and never reaching the target.
     // at 0.1 movement power, it can pretty much stop as soon as it wants to.
-    final double maxPower = 0.80;
+//    final double maxPower = 0.85;
     final double minPower = 0.11;
 
     final double maxYaw = 0.75;
@@ -84,6 +84,13 @@ public class JTracking {
 
     public void setPosition(SparkFunOTOS.Pose2D pose) {
         otos.setPosition(pose);
+        telemetryAll.addData("y", pose.y);
+        telemetryAll.addData("x", pose.x);
+        telemetryAll.update();
+    }
+
+    public SparkFunOTOS.Pose2D getPosition() {
+        return otos.getPosition();
     }
 
     public void setMotors(double bl, double br, double fl, double fr) {
@@ -141,19 +148,19 @@ public class JTracking {
         return sign * Math.min(Math.max(absPower, min), max);
     }
 
-    public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance) {
-        SparkFunOTOS.Pose2D pos = otos.getPosition();
+    public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
+        SparkFunOTOS.Pose2D pose = otos.getPosition();
 
         double yaw = 0;
         double power = 0;
-        double errorX = targetX - pos.x;
-        double errorY = targetY - pos.y;
+        double errorX = targetX - pose.x;
+        double errorY = targetY - pose.y;
 
         double posError = Math.sqrt(errorX*errorX + errorY*errorY);
         double prevPosError = posError;
         double posErrorDiff = 0;
 
-        double headingError = minimizeAngle(targetHeading - pos.h);
+        double headingError = minimizeAngle(targetHeading - pose.h);
         double prevHeadingError = headingError;
         double headingErrorDiff = 0;
 
@@ -162,13 +169,13 @@ public class JTracking {
             prevHeadingError = headingError;
 
             // recalculate position and error
-            pos = otos.getPosition();
+            pose = otos.getPosition();
 
-            errorX = targetX - pos.x;
-            errorY = targetY - pos.y;
+            errorX = targetX - pose.x;
+            errorY = targetY - pose.y;
 
             posError = Math.sqrt(errorX*errorX + errorY*errorY);
-            headingError = minimizeAngle(targetHeading - pos.h);
+            headingError = minimizeAngle(targetHeading - pose.h);
 
             posErrorDiff = posError - prevPosError;
             headingErrorDiff = headingError - prevHeadingError;
@@ -178,17 +185,17 @@ public class JTracking {
             yaw = constrainPower(minYaw, maxYaw, yaw);
 
             power = position_p * posError + position_d * posErrorDiff;
-            power = constrainPower(minPower, maxPower, power);
+            power = constrainPower(minPower, currentMaxPower, power);
 
             telemetryAll.addData("posError", posError);
             telemetryAll.addData("yaw", yaw);
             telemetryAll.addData("power", power);
-            telemetryAll.addData("y", pos.y);
-            telemetryAll.addData("x", pos.x);
+            telemetryAll.addData("y", pose.y);
+            telemetryAll.addData("x", pose.x);
             telemetryAll.update();
 
             // using error x and y, we know the exact direction we need to travel in the x and y directions
-            moveFieldCentric(errorX, errorY, pos.h, power, yaw);
+            moveFieldCentric(errorX, errorY, pose.h, power, yaw);
         }
 
         stopMotors();
