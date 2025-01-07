@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
-@Disabled
 public class RightAutoOld extends LinearOpMode {
     private IMU imu;
     private DcMotor backLeft;

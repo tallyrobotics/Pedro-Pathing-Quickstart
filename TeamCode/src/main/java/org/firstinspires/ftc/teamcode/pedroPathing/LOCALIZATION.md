@@ -199,7 +199,7 @@ that applies to you and follow the directions there.
   robot around and see if the movements look accurate on FTC Dashboard. If they don't, then you'll
   want to re-run some of the previous steps. Otherwise, congrats on tuning your localizer!
 
-# OTOS Localizer
+# Otos Localizer
 * First, you'll need the OTOS connected to an I2C port on a hub. Make sure the film on the sensor is removed.
 * Then, go to `OTOSLocalizer.java`. First, in the constructor, go to where it tells you to replace 
   the current statement with your OTOS port in the constructor. Replace the `deviceName` parameter

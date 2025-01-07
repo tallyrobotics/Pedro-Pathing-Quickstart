@@ -25,18 +25,26 @@ public class JTracking {
     private Telemetry telemetryAll;
     private SparkFunOTOS otos;
 
+    // tinybot
+//    public double robotWidth = 8.75;
+
+    // regular bot
+    static double robotWidth = 16.6875;
+
     // tune these values to the point where moveFieldCentric(1, 1, 0, 0.2, 0) moves it exactly diagonally to the top-right
     final double forwardFactor = 1.0;
-    final double strafeFactor = 1.4;
+    final double strafeFactor = 1.0;
 
 //    final double posErrorTolerance = 0.05;
 //    final double headingErrorTolerance = 0.5;
 
-    final double position_p = 0.09;
+    final double position_p = 0.08;
     final double position_d = 0.03;
 
     final double heading_p = 0.09;
     final double heading_d = 0.04;
+
+    double movementScalar = 24 / 34.75;
 
     // we add minimum powers to prevent it from halting and never reaching the target.
     // at 0.1 movement power, it can pretty much stop as soon as it wants to.
@@ -44,7 +52,7 @@ public class JTracking {
     final double minPower = 0.11;
 
     final double maxYaw = 0.75;
-    final double minYaw = 0.05;
+    final double minYaw = 0.00;
 
     public JTracking(LinearOpMode initOpMode, HardwareMap initHardwareMap) {
         opMode = initOpMode;
@@ -65,12 +73,21 @@ public class JTracking {
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        otos.setOffset(new SparkFunOTOS.Pose2D(0.075, 3.40625, 0));
-        otos.setLinearScalar(1.0739); //0.9637
+        // tinybot
+//        otos.setLinearScalar(1.11);
+//        otos.setAngularScalar(0.9675/*1.0*/);
+
+        // regular bot
+        otos.setLinearScalar(1.029765); //0.99856
         otos.setAngularScalar(1.000); //0.9798
 
         otos.setLinearUnit(DistanceUnit.INCH);
         otos.setAngularUnit(AngleUnit.DEGREES);
+
+        // tinybot
+//        otos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0));
+        // regular bot
+        otos.setOffset(new SparkFunOTOS.Pose2D(-1.5, 3.375, 90));
 
         otos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
         otos.resetTracking();
@@ -84,8 +101,9 @@ public class JTracking {
 
     public void setPosition(SparkFunOTOS.Pose2D pose) {
         otos.setPosition(pose);
-        telemetryAll.addData("y", pose.y);
+        telemetryAll.addLine("position updated");
         telemetryAll.addData("x", pose.x);
+        telemetryAll.addData("y", pose.y);
         telemetryAll.update();
     }
 
@@ -116,13 +134,15 @@ public class JTracking {
 
         double d = Math.sqrt(scaledX*scaledX + scaledY*scaledY);
 
-        // if you think about what should happen when we have a heading of 0, this should make sense.
         double normalizedX = scaledX / d;
         double normalizedY = scaledY / d;
 
-        // we initialize
-        double lateral = normalizedX * Math.sin(heading / 180 * Math.PI) - normalizedY * Math.cos(heading / 180 * Math.PI);
-        double axial = normalizedX * Math.cos(heading / 180 * Math.PI) + normalizedY * Math.sin(heading / 180 * Math.PI);
+        // if heading = 0:
+        // axial points in x direction
+        // lateral points in -y direction
+
+        double lateral = normalizedX * Math.sin(Math.toRadians(heading)) - normalizedY * Math.cos(Math.toRadians(heading));
+        double axial   = normalizedX * Math.cos(Math.toRadians(heading)) + normalizedY * Math.sin(Math.toRadians(heading));
 
         lateral *= power;
         axial *= power;
@@ -149,7 +169,7 @@ public class JTracking {
     }
 
     public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
-        SparkFunOTOS.Pose2D pose = otos.getPosition();
+        SparkFunOTOS.Pose2D pose = getPosition();
 
         double yaw = 0;
         double power = 0;
@@ -165,13 +185,12 @@ public class JTracking {
         double headingErrorDiff = 0;
 
         int haltTimer = 0;
-
         while (opMode.opModeIsActive() && ((posError > posErrorTolerance) || (Math.abs(headingError) > headingErrorTolerance))) {
             prevPosError = posError;
             prevHeadingError = headingError;
 
             // recalculate position and error
-            pose = otos.getPosition();
+            pose = getPosition();
 
             errorX = targetX - pose.x;
             errorY = targetY - pose.y;
@@ -192,25 +211,31 @@ public class JTracking {
             telemetryAll.addData("posError", posError);
             telemetryAll.addData("yaw", yaw);
             telemetryAll.addData("power", power);
-            telemetryAll.addData("y", pose.y);
             telemetryAll.addData("x", pose.x);
+            telemetryAll.addData("y", pose.y);
             telemetryAll.update();
 
             // using error x and y, we know the exact direction we need to travel in the x and y directions
             moveFieldCentric(errorX, errorY, pose.h, power, yaw);
 
-            // if we have halted for some reason (likely because of hitting a wall)
+            // if we have stopped moving for some reason (likely because of hitting a wall)
             if (Math.abs(posErrorDiff) < 0.05) {
+                // increase the halt timer
                 haltTimer++;
             } else {
+                // else reset the timer
                 haltTimer = 0;
             }
 
+            // if we have halted for over 30 cycles
             if (haltTimer > 30) {
+                telemetryAll.addLine("exited from halt");
+                telemetryAll.update();
+                // exit from movement
                 break;
             }
         }
-
+        // stop the motors
         stopMotors();
     }
 }
