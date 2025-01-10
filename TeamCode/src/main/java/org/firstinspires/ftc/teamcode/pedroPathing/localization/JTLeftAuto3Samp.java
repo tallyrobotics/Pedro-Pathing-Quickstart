@@ -64,7 +64,7 @@ public class JTLeftAuto3Samp extends LinearOpMode {
             sleep(1250);
             tracker.moveTo(25.85, 6.75, 0, 0.1, 0.5, 0.6); // Robot move sot the high chamber
             claw.setPosition(1);
-            tracker.setMotorsOmni(0.2, 0, 0); // Robot moves forward to clip
+            tracker.setMotorsMecanum(0.2, 0, 0); // Robot moves forward to clip
             arm.setTargetPosition(2000);
             sleep(1100);
             arm.setTargetPosition(3250);
@@ -87,7 +87,7 @@ public class JTLeftAuto3Samp extends LinearOpMode {
             tracker.moveTo(10, 58, 0, 2, 0.5,0.9); // Robot pushes the 2nd sample into the net zone
             tracker.moveTo(52, 58, 0, 2, 0.5,0.9); // Robot moves forward in front of the 3rd sample
             // align with left wall
-            tracker.setMotorsOmni(0, -0.4, 0);
+            tracker.setMotorsMecanum(0, -0.4, 0);
             sleep(1000);
             tracker.stopMotors();
             pose = tracker.getPosition();

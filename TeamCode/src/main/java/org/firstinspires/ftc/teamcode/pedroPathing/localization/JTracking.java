@@ -122,7 +122,7 @@ public class JTracking {
         setMotors(0,0,0,0);
     }
 
-    public void setMotorsOmni(double axial, double lateral, double yaw) {
+    public void setMotorsMecanum(double axial, double lateral, double yaw) {
         // again, a positive yaw makes the robot rotate COUNTERCLOCKWISE
         setMotors(axial - lateral - yaw, axial + lateral + yaw, axial + lateral - yaw, axial - lateral + yaw);
     }
@@ -147,7 +147,7 @@ public class JTracking {
         lateral *= power;
         axial *= power;
 
-        setMotorsOmni(axial, lateral, yaw);
+        setMotorsMecanum(axial, lateral, yaw);
     }
 
     public double getError(double targetX, double targetY, double currentX, double currentY) {

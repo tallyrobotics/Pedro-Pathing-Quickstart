@@ -65,7 +65,7 @@ public class JTRightAuto2Spec extends LinearOpMode {
             sleep(1250);
             tracker.moveTo(25.85, -6.75, 0, 0.1, 0.5, 0.6); // Robot moves to the high chamber
             claw.setPosition(1);
-            tracker.setMotorsOmni(0.2, 0, 0); // Robot moves forward while clipping
+            tracker.setMotorsMecanum(0.2, 0, 0); // Robot moves forward while clipping
             arm.setTargetPosition(2000);
             sleep(1100);
             arm.setTargetPosition(3250);
@@ -88,7 +88,7 @@ public class JTRightAuto2Spec extends LinearOpMode {
             // 2
             tracker.moveTo(10, -60, 0, 1, 0.5,0.9); // Robot moves backward to push sample into the HP area
             // align with right wall
-            tracker.setMotorsOmni(0, 0.4, 0);
+            tracker.setMotorsMecanum(0, 0.4, 0);
             sleep(500);
             tracker.stopMotors();
             pose = tracker.getPosition();
@@ -107,7 +107,7 @@ public class JTRightAuto2Spec extends LinearOpMode {
             arm.setTargetPosition(4180); // Sets arm to the high chamber height
             tracker.moveTo(17, -0.75, 0, 2, 0.5, 0.9); // Robot moves close to the high chamber
             tracker.moveTo(25.85, -0.75, 0, 0.1, 0.5, 0.6); // Robot moves directly in front of the high chamber
-            tracker.setMotorsOmni(0.2, 0, 0); // Robot moves forward slightly while clipping
+            tracker.setMotorsMecanum(0.2, 0, 0); // Robot moves forward slightly while clipping
             arm.setTargetPosition(2000); // Robot arm moves down to clip
             sleep(1100);
             arm.setTargetPosition(3250);

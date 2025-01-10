@@ -65,7 +65,7 @@ public class JTRightAuto3Spec extends LinearOpMode {
             sleep(900);
             tracker.moveTo(25.85, -6.5, 0, 0.1, 0.5, 0.6); // Robot moves to the high chamber
             claw.setPosition(1);
-            tracker.setMotorsOmni(0.3, 0, 0);
+            tracker.setMotorsMecanum(0.3, 0, 0);
             arm.setTargetPosition(2000);
             sleep(800);
             arm.setTargetPosition(3250);
@@ -87,9 +87,9 @@ public class JTRightAuto3Spec extends LinearOpMode {
             tracker.moveTo(50, -58.5, 0, 1, 0.5,0.9);
             // 2
             tracker.moveTo(10, -58.5, 0, 1, 0.5,1.0);
-            tracker.setMotorsOmni(0.15, 0, 0);
+            tracker.setMotorsMecanum(0.15, 0, 0);
             // align with right wall
-            tracker.setMotorsOmni(0, 0.4, 0);
+            tracker.setMotorsMecanum(0, 0.4, 0);
             sleep(500);
             tracker.stopMotors();
             pose = tracker.getPosition();
@@ -108,7 +108,7 @@ public class JTRightAuto3Spec extends LinearOpMode {
             arm.setTargetPosition(4180);
             tracker.moveTo(17, -3.5, 0, 1, 0.5, 0.9);
             tracker.moveTo(25.7, -3.5, 0, 0.1, 0.5, 0.6);
-            tracker.setMotorsOmni(0.2, 0, 0);
+            tracker.setMotorsMecanum(0.2, 0, 0);
             arm.setTargetPosition(2000);
             sleep(800);
             arm.setTargetPosition(3250);
@@ -132,7 +132,7 @@ public class JTRightAuto3Spec extends LinearOpMode {
             arm.setTargetPosition(4180);
             tracker.moveTo(17, -0.5, 0, 1, 0.5, 0.9);
             tracker.moveTo(25.7, -0.5, 0, 0.1, 0.5, 0.6);
-            tracker.setMotorsOmni(0.2, 0, 0);
+            tracker.setMotorsMecanum(0.2, 0, 0);
             arm.setTargetPosition(2000);
             sleep(800);
             arm.setTargetPosition(3250);
