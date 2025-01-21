@@ -9,13 +9,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 @Autonomous (group = "Auto JTracking")
-public class JTTest extends LinearOpMode {
+public class ArmsDoingStuff extends LinearOpMode {
     private DcMotor backLeft;
     private DcMotor backRight;
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor arm;
+    private DcMotor armOther;
     private Servo claw;
+
 
 //    private SparkFunOTOS otos;
 
@@ -29,8 +31,9 @@ public class JTTest extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         arm = hardwareMap.get(DcMotor.class, "arm");
+        armOther = hardwareMap.get(DcMotor.class, "armOther");
 //        otos = hardwareMap.get(SparkFunOTOS.class, "otos");
-        claw = hardwareMap.get(Servo.class, "elbowClaw");
+        claw = hardwareMap.get(Servo.class, "claw");
 
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -38,35 +41,27 @@ public class JTTest extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         backRight.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        arm.setDirection(DcMotor.Direction.REVERSE);
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setTargetPosition(0);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(1);
+//        arm.setDirection(DcMotor.Direction.REVERSE);
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armOther.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        claw.scaleRange(0.51, 1);
-
-        JTracking tracker = new JTracking(this, hardwareMap);
-        /* it's easier to set the back wall to be x = 0, but if we want to reuse positions for
-        left and right autos, we have to use specific y values for the starting position. */
-        pose = new SparkFunOTOS.Pose2D(0, -24+tracker.robotWidth/2, 0);
-
-
-        tracker.setPosition(pose);
+//        claw.scaleRange(0.51, 1);
+//
+//        JTracking tracker = new JTracking(this, hardwareMap);
+//        /* it's easier to set the back wall to be x = 0, but if we want to reuse positions for
+//        left and right autos, we have to use specific y values for the starting position. */
+//        pose = new SparkFunOTOS.Pose2D(0, -24+tracker.robotWidth/2, 0);
+//        tracker.setPosition(pose);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         while (opModeIsActive()) {
-            tracker.moveTo(48, pose.y, 0, 0.1, 0.5, 0.6);
-            tracker.moveTo(48,pose.y-24, 0, 0.1, 0.5, 0.6);
-            tracker.moveTo(0,pose.y, 90, 0.1, 0.5, 0.6);
-        //stalls until time runs out
-            while (opModeIsActive()) {
-                sleep(1000);
+            arm.setPower(0.1);
+            armOther.setPower(0.1);
             }
         }
     }
-}

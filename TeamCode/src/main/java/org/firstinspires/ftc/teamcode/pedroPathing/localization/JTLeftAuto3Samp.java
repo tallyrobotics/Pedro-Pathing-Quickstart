@@ -15,7 +15,10 @@ public class JTLeftAuto3Samp extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor arm;
+    private DcMotor armOther;
     private Servo claw;
+
+    JArm armPID;
 
 //    private SparkFunOTOS otos;
     private SparkFunOTOS.Pose2D pose;
@@ -23,11 +26,13 @@ public class JTLeftAuto3Samp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         arm = hardwareMap.get(DcMotor.class, "arm");
+        armOther = hardwareMap.get(DcMotor.class, "armOther");
 //        otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         claw = hardwareMap.get(Servo.class, "claw");
 
@@ -40,11 +45,11 @@ public class JTLeftAuto3Samp extends LinearOpMode {
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        arm.setDirection(DcMotor.Direction.REVERSE);
+//        arm.setDirection(DcMotor.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(1);
+        arm.setPower(0);
 
         claw.scaleRange(0.45, 1);
 

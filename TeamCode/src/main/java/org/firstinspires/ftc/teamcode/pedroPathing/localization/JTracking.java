@@ -29,7 +29,8 @@ public class JTracking {
 //    public double robotWidth = 8.75;
 
     // regular bot
-    static double robotWidth = 16.6875;
+    static double robotWidth = 13.8125;
+    static double robotHeight = 16.6875;
 
     // tune these values to the point where moveFieldCentric(1, 1, 0, 0.2, 0) moves it exactly diagonally to the top-right
     final double forwardFactor = 1.0;
@@ -41,8 +42,8 @@ public class JTracking {
     final double position_p = 0.08;
     final double position_d = 0.03;
 
-    final double heading_p = 0.09;
-    final double heading_d = 0.04;
+    final double heading_p = 0.07;
+    final double heading_d = 0.07;
 
     double movementScalar = 24 / 34.75;
 
@@ -69,9 +70,9 @@ public class JTracking {
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        backRight.setDirection(DcMotor.Direction.REVERSE);
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
 
         // tinybot
 //        otos.setLinearScalar(1.11);
@@ -166,6 +167,10 @@ public class JTracking {
         double sign = Math.signum(power);
 
         return sign * Math.min(Math.max(absPower, min), max);
+    }
+
+    public void moveTo(SparkFunOTOS.Pose2D pose, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
+        moveTo(pose.x, pose.y, pose.h, posErrorTolerance, headingErrorTolerance, currentMaxPower);
     }
 
     public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
