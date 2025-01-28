@@ -15,32 +15,32 @@ public class JArm implements Runnable {
 
     private Telemetry telemetryAll;
 
-    private DcMotor arm;
-    private DcMotor armOther;
+    private DcMotor arm1;
+    private DcMotor arm2;
     private AnalogInput pot;
 
     private double targetPot = 0;
 
-    final double p = 0.0030;
-    final double i = 0.0005;
-    final double d = 0.0020;
+    final double p = 0.80;
+    final double i = 0.10;
+    final double d = 0.60;
 
-    static double specimenPlace = 0;
-    static double betweenChamber = 0;
-    static double specimenGrab = 0;
-    static double basketPlace = 0;
+    static double specimenPlace = 1.791;
+    static double specimenGrab = 1.175;
+    static double basketPlace = 2.908;
     static double groundGrab = 0;
+    static double parkingHeight = 0;
 
     public JArm(LinearOpMode initOpMode, HardwareMap initHardwareMap) {
         opMode = initOpMode;
         hardwareMap = initHardwareMap;
 
-        arm = hardwareMap.get(DcMotor.class, "arm");
-        armOther = hardwareMap.get(DcMotor.class, "armOther");
+        arm1 = hardwareMap.get(DcMotor.class, "arm");
+        arm2 = hardwareMap.get(DcMotor.class, "armOther");
         pot = hardwareMap.get(AnalogInput.class, "pot");
 
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        armOther.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetryAll = new MultipleTelemetry(opMode.telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetryAll.addData("Status", "Initialized");
@@ -71,8 +71,8 @@ public class JArm implements Runnable {
 
 
             double power = error * p + errorSum * i + errorDiff * d;
-            arm.setPower(power);
-            armOther.setPower(power);
+            arm1.setPower(power);
+            arm2.setPower(power);
 
             telemetryAll.addData("error", error);
             telemetryAll.addData("pot", currentPot);

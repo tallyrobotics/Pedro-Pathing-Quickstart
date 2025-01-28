@@ -30,7 +30,7 @@ public class JTracking {
 
     // regular bot
     static double robotWidth = 13.8125;
-    static double robotHeight = 16.6875;
+    static double robotLength = 16.6875;
 
     // tune these values to the point where moveFieldCentric(1, 1, 0, 0.2, 0) moves it exactly diagonally to the top-right
     final double forwardFactor = 1.0;
@@ -40,19 +40,16 @@ public class JTracking {
 //    final double headingErrorTolerance = 0.5;
 
     final double position_p = 0.08;
-    final double position_d = 0.03;
+    final double position_d = 0.16;
 
-    final double heading_p = 0.07;
-    final double heading_d = 0.07;
-
-    double movementScalar = 24 / 34.75;
+    final double heading_p = 0.06;
+    final double heading_d = 0.08;
 
     // we add minimum powers to prevent it from halting and never reaching the target.
     // at 0.1 movement power, it can pretty much stop as soon as it wants to.
-//    final double maxPower = 0.85;
     final double minPower = 0.11;
 
-    final double maxYaw = 0.75;
+    final double maxYaw = 0.60;
     final double minYaw = 0.00;
 
     public JTracking(LinearOpMode initOpMode, HardwareMap initHardwareMap) {
@@ -79,7 +76,7 @@ public class JTracking {
 //        otos.setAngularScalar(0.9675/*1.0*/);
 
         // regular bot
-        otos.setLinearScalar(1.029765); //0.99856
+        otos.setLinearScalar(1.052227); //0.99856
         otos.setAngularScalar(1.000); //0.9798
 
         otos.setLinearUnit(DistanceUnit.INCH);
@@ -87,10 +84,11 @@ public class JTracking {
 
         // tinybot
 //        otos.setOffset(new SparkFunOTOS.Pose2D(0, 0, 0));
+
         // regular bot
         otos.setOffset(new SparkFunOTOS.Pose2D(-1.5, 3.375, 90));
 
-        otos.setPosition(new SparkFunOTOS.Pose2D(0, 0, 0));
+        // initialization
         otos.resetTracking();
 
         telemetryAll = new MultipleTelemetry(opMode.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -102,7 +100,7 @@ public class JTracking {
 
     public void setPosition(SparkFunOTOS.Pose2D pose) {
         otos.setPosition(pose);
-        telemetryAll.addLine("position updated");
+        telemetryAll.addLine("Position Updated");
         telemetryAll.addData("x", pose.x);
         telemetryAll.addData("y", pose.y);
         telemetryAll.update();
@@ -169,11 +167,11 @@ public class JTracking {
         return sign * Math.min(Math.max(absPower, min), max);
     }
 
-    public void moveTo(SparkFunOTOS.Pose2D pose, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
-        moveTo(pose.x, pose.y, pose.h, posErrorTolerance, headingErrorTolerance, currentMaxPower);
+    public void moveToPose(SparkFunOTOS.Pose2D pose, double posErrorTolerance, double headingErrorTolerance, double maxPower) {
+        moveTo(pose.x, pose.y, pose.h, posErrorTolerance, headingErrorTolerance, maxPower);
     }
 
-    public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance, double currentMaxPower) {
+    public void moveTo(double targetX, double targetY, double targetHeading, double posErrorTolerance, double headingErrorTolerance, double maxPower) {
         SparkFunOTOS.Pose2D pose = getPosition();
 
         double yaw = 0;
@@ -211,9 +209,8 @@ public class JTracking {
             yaw = constrainPower(minYaw, maxYaw, yaw);
 
             power = position_p * posError + position_d * posErrorDiff;
-            power = constrainPower(minPower, currentMaxPower, power);
+            power = constrainPower(minPower, maxPower, power);
 
-            telemetryAll.addData("posError", posError);
             telemetryAll.addData("yaw", yaw);
             telemetryAll.addData("power", power);
             telemetryAll.addData("x", pose.x);

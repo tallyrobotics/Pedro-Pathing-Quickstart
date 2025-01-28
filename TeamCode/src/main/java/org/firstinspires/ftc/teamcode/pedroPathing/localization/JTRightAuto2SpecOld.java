@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 @Autonomous (group = "Auto JTracking")
-public class JTRightAuto2Spec extends LinearOpMode {
+public class JTRightAuto2SpecOld extends LinearOpMode {
     private DcMotor backLeft;
     private DcMotor backRight;
     private DcMotor frontLeft;
